@@ -1,0 +1,194 @@
+<!doctype html>
+<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+  <head>
+    <title>JQuery Assignment 1</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="data.js"></script>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      table {
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid black;
+        border-radius: 4px; /* works here */
+        overflow: hidden;
+        width: 60%;
+      }
+
+      table tr th,
+      table tr td {
+        border: 1px solid black;
+        padding: 5px 4px;
+      }
+    </style>
+  
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:xd_Signature msdt:dt="string"></mso:xd_Signature>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor msdt:dt="string">SharePoint App</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor>
+<mso:Order msdt:dt="string">3200.00000000000</mso:Order>
+<mso:xd_ProgID msdt:dt="string"></mso:xd_ProgID>
+<mso:_ExtendedDescription msdt:dt="string"></mso:_ExtendedDescription>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author msdt:dt="string">SharePoint App</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author>
+<mso:ComplianceAssetId msdt:dt="string"></mso:ComplianceAssetId>
+<mso:TemplateUrl msdt:dt="string"></mso:TemplateUrl>
+<mso:ReferenceId msdt:dt="string"></mso:ReferenceId>
+<mso:ContentTypeId msdt:dt="string">0x0101008F7E6A595F677440AEB4255EBF4A3A1B</mso:ContentTypeId>
+<mso:TriggerFlowInfo msdt:dt="string"></mso:TriggerFlowInfo>
+<mso:_SourceUrl msdt:dt="string"></mso:_SourceUrl>
+<mso:_SharedFileIndex msdt:dt="string"></mso:_SharedFileIndex>
+<mso:TaxCatchAll msdt:dt="string"></mso:TaxCatchAll>
+<mso:MediaServiceImageTags msdt:dt="string"></mso:MediaServiceImageTags>
+<mso:lcf76f155ced4ddcb4097134ff3c332f msdt:dt="string"></mso:lcf76f155ced4ddcb4097134ff3c332f>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+  <body>
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 5%">ID</th>
+            <th style="width: 30%">Name</th>
+            <th>Midterm</th>
+            <th>Final</th>
+            <th>Total</th>
+            <th>Grade</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <script>
+        $(document).ready(function () {
+            function displayStudents() {
+
+          $("#table-body").empty();
+
+          $.each(students, function (index, student) {
+
+              let row = `
+                  <tr data-index="${index}">
+                      <td>${student.id}</td>
+                      <td>${student.name}</td>
+                      <td class="editable" data-field="midterm">${student.midterm}</td>
+                      <td class="editable" data-field="final">${student.final}</td>
+                      <td class="total"></td>
+                      <td class="grade"></td>
+                  </tr>
+              `;
+
+              $("#table-body").append(row);
+
+          });
+
+      }
+
+
+      function calculateTotal(student) {
+          return student.midterm + student.final;
+      }
+
+
+      function calculateGrade(total) {
+
+          if (total >= 80) {
+              return "A";
+          } else if (total >= 70) {
+              return "B";
+          } else if (total >= 60) {
+              return "C";
+          } else if (total >= 50) {
+              return "D";
+          } else {
+              return "F";
+          }
+
+      }
+
+
+      displayStudents();
+
+
+      $("#table-body").on("click", ".editable", function () {
+
+          let cell = $(this);
+
+          if (cell.find("input").length > 0) {
+              return;
+          }
+
+          let oldScore = cell.text().trim();
+
+          let input = $("<input>");
+
+          input.attr("type", "number");
+          input.attr("min", 0);
+          input.attr("max", 50);
+          input.val(oldScore);
+
+          // Keep input inside the same table cell
+          input.css({
+              width: "90%",
+              boxSizing: "border-box"
+          });
+
+
+          cell.empty();
+          cell.append(input);
+
+          input.focus();
+          input.select();
+
+
+          input.on("keydown", function (event) {
+
+              if (event.key === "Enter") {
+
+                  let newScore = parseInt(input.val());
+
+                  if (isNaN(newScore) || newScore < 0 || newScore > 50) {
+
+                      alert("Score must be between 0 and 50");
+
+                      cell.text(oldScore);
+
+                      return;
+                  }
+
+
+                  let row = cell.closest("tr");
+                  let index = row.data("index");
+                  let field = cell.data("field");
+
+
+                  students[index][field] = newScore;
+
+                  cell.text(newScore);
+
+
+                  let total = calculateTotal(students[index]);
+                  let grade = calculateGrade(total);
+
+                  row.find(".total").text(total);
+                  row.find(".grade").text(grade);
+
+
+              } else if (event.key === "Escape") {
+
+                  cell.text(oldScore);
+
+              }
+
+          });
+
+      });
+
+  });
+    </script>
+    
+  </body>
+</html>
